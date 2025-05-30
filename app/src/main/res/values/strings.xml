@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Pokemon App</string>
+    <string name="species">Species: %1$s</string>
+    <string name="name">Name: %1$s</string>
+    <string name="id">ID: %1$s</string>
+    <string name="order">Order: #%1$s</string>
+    <string name="image_of">Image of %1$s</string>
+    <string name="types">Types: %1$s</string>
+    <string name="abilities">Abilities: %1$s</string>
+    <string name="weight">Weight: %1$s</string>
+    <string name="height">Height: %1$s</string>
+    <string name="stats">Stats:</string>
+</resources>

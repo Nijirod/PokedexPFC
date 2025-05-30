@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Pokemon.Splash" parent="Theme.MaterialComponents.DayNight">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="postSplashScreenTheme">@style/Theme.Pokemon</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_pokeball</item>
+    </style>
+</resources>
