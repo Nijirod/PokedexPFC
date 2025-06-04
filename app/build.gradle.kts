@@ -28,8 +28,18 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:\\Users\\nicol\\repos\\my-release-key.jks")
+            storePassword = "123456"
+            keyAlias = "123456"
+            keyPassword = "123456"
+        }
+    }
+
     buildTypes {
-        release {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
