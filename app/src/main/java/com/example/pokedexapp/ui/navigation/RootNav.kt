@@ -59,7 +59,9 @@ fun NavGraphBuilder.addSearchNavGraph(navController: NavHostController) {
         route = ScreenRoutes.SearchNav.route
     ) {
         composable(ScreenRoutes.SearchScreen.route) {
-            SearchScreen()
+            SearchScreen(
+                pokemonNavigation = PokemonNavigation(navController)
+            )
         }
     }
 }
