@@ -39,7 +39,9 @@ fun BottomNavGraph(navController: NavHostController, modifier: Modifier = Modifi
             }
         }
         composable(ScreenRoutes.SearchScreen.route) {
-            SearchScreen()
+            SearchScreen(
+                pokemonNavigation = PokemonNavigation(navController)
+            )
         }
         composable(ScreenRoutes.SettingsScreen.route) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
