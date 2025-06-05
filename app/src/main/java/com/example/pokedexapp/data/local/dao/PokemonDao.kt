@@ -79,6 +79,18 @@ interface PokemonDao {
         COALESCE(pokemon_favorite.isFavorite, 0) AS isFavorite
     FROM pokemon_list
     LEFT JOIN pokemon_favorite ON pokemon_list.id = pokemon_favorite.id
+    WHERE pokemon_list.id = :id
+""")
+    suspend fun getPokemonById(id: Int): PokemonListWithFavoriteView?
+
+    @Query("""
+    SELECT
+        pokemon_list.id,
+        pokemon_list.name,
+        pokemon_list.url,
+        COALESCE(pokemon_favorite.isFavorite, 0) AS isFavorite
+    FROM pokemon_list
+    LEFT JOIN pokemon_favorite ON pokemon_list.id = pokemon_favorite.id
     WHERE pokemon_list.name = :name
     """)
     suspend fun getPokemonByName(name: String): PokemonListWithFavoriteView?
@@ -142,4 +154,22 @@ WHERE pokemonId = :pokemonId AND
         game: String,
         type: SpriteType
     ): SpritesEntity?
+
+    @Query("""
+    SELECT
+        pokemon_list.id,
+        pokemon_list.name,
+        pokemon_list.url,
+        COALESCE(pokemon_favorite.isFavorite, 0) AS isFavorite
+    FROM pokemon_list
+    LEFT JOIN pokemon_favorite ON pokemon_list.id = pokemon_favorite.id
+    WHERE pokemon_list.id BETWEEN :startId AND :endId
+    LIMIT :limit OFFSET :offset
+""")
+    suspend fun getPokemonByGeneration(
+        startId: Int,
+        endId: Int,
+        limit: Int,
+        offset: Int
+    ): List<PokemonListWithFavoriteView>
 }

@@ -7,14 +7,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import com.example.pokedexapp.ui.components.DropdownMenu
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
-import kotlinx.coroutines.flow.filter
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.pokedexapp.utils.getCenteredPokemonIndex
@@ -38,25 +34,53 @@ fun PokemonListScreen(
     modifier: Modifier = Modifier
 ) {
     val viewModel: PokemonListViewModel = hiltViewModel()
-    val pokemonList by viewModel.pokemonList.collectAsState()
-    var selectedPokemon by rememberPokemonListState(pokemonList.firstOrNull())
-    var filterText by remember { mutableStateOf("") }
+    val filteredList by viewModel.filteredPokemonList.collectAsState()
+    var selectedPokemon by rememberPokemonListState(filteredList.firstOrNull())
+
+
+    val generations = listOf(
+        "Todas" to null,
+        "Gen 1" to (1 to 151),
+        "Gen 2" to (152 to 251),
+        "Gen 3" to (252 to 386),
+        "Gen 4" to (387 to 494),
+        "Gen 5" to (495 to 649),
+        "Gen 6" to (650 to 721),
+        "Gen 7" to (722 to 809),
+        "Gen 8" to (810 to 905),
+        "Gen 9" to (906 to 1010)
+    )
+    var selectedGen by remember { mutableStateOf(generations[0]) }
+    val showFavorites by viewModel.filteredPokemonList.collectAsState().let { derivedStateOf { viewModel.filteredPokemonList.value.any { it.isFavorite } && viewModel.filteredPokemonList.value.all { it.isFavorite } } }
+    var showFav by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Pokédex") },
-                modifier = Modifier.fillMaxWidth()
-                    .background(Color.Red),
+                modifier = Modifier.fillMaxWidth().background(Color.Red),
                 actions = {
-                    DropdownMenu(
-                        options = listOf("All", "Favorites"),
-                        selectedOption = if (filterText.isEmpty()) "All" else "Favorites",
-                        onOptionSelected = { option ->
-                            filterText = if (option == "All") "" else pokemonList.filter { it.isFavorite }
-                                .joinToString(", ") { it.name }
-                        }
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        DropdownMenu(
+                            options = generations.map { it.first },
+                            selectedOption = selectedGen.first,
+                            onOptionSelected = { option ->
+                                selectedGen = generations.first { it.first == option }
+                                viewModel.setGeneration(selectedGen.second)
+                                viewModel.resetPage()
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        DropdownMenu(
+                            options = listOf("Todos", "Favoritos"),
+                            selectedOption = if (showFav) "Favoritos" else "Todos",
+                            onOptionSelected = { option ->
+                                showFav = option == "Favoritos"
+                                viewModel.setShowFavorites(showFav)
+                                viewModel.resetPage()
+                            }
+                        )
+                    }
                 }
             )
         }
@@ -80,7 +104,7 @@ fun PokemonListScreen(
                 }
             }
             PokemonListContent(
-                pokemonList = pokemonList.filter { it.name.contains(filterText, ignoreCase = true) },
+                pokemonList = filteredList,
                 modifier = Modifier.weight(0.6f),
                 onItemClick = { pokemon ->
                     selectedPokemon = pokemon
@@ -122,7 +146,6 @@ private fun PokemonListContent(
         }
     }
 
-
     LaunchedEffect(pokemonList) {
         if (selectedPokemon !in pokemonList) {
             pokemonList.firstOrNull()?.let { onPokemonSelected(it) }
@@ -158,8 +181,8 @@ private fun PokemonListContent(
             }
         }
     }
-
 }
+
 
 @Composable
 @Preview
