@@ -156,7 +156,6 @@ private fun PokemonListContent(
         state = listState,
         flingBehavior = snapperFlingBehavior,
         modifier = modifier
-            .padding(16.dp)
             .fillMaxWidth(),
         contentPadding = PaddingValues(vertical = 210.dp)
     ) {

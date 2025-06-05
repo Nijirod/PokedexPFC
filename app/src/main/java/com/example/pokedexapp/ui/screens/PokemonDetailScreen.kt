@@ -1,6 +1,7 @@
  package com.example.pokedexapp.ui.screens
 
 import ChoosePokemonSpriteScreen
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +26,7 @@ import com.example.pokedexapp.data.local.entities.pokemondetail.otherentities.Sp
 import com.example.pokedexapp.ui.components.StatBar
 import com.example.pokedexapp.ui.viewmodel.PokemonDetailViewModel
 import com.example.pokedexapp.utils.ImageResizer
+import com.example.pokedexapp.utils.PokemonTypeDrawableMapper
 import com.example.pokedexapp.utils.WearNodeHelper
 import com.example.pokedexapp.utils.sendUrlsToWear
 import kotlinx.coroutines.CoroutineScope
@@ -67,25 +70,6 @@ fun PokemonDetailScreen(
                 onDismiss = { showSpriteChooser = false }
             )
         }
-        Button(
-            onClick = {
-                val imageUrl = selectedSpriteUrl
-                    ?: detail.sprites?.firstOrNull { it.type == SpriteType.FRONT_DEFAULT }
-                        ?.let { "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${it.pokemonId}.png" }
-                    ?: ""
-                val cryUrl = detail.cries?.latest
-
-                if (cryUrl != null) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        WearNodeHelper.logConnectedNodes(context)
-                        WearNodeHelper.sendMessageToWatch(context, "$imageUrl,$cryUrl")
-                    }
-                }
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Enviar a reloj")
-        }
     }
 }
  @Composable
@@ -98,27 +82,15 @@ fun PokemonDetailScreen(
  ) {
      Column(
          modifier = modifier
-             .padding(16.dp)
              .verticalScroll(scrollState)
              .fillMaxWidth(),
          verticalArrangement = Arrangement.spacedBy(8.dp),
          horizontalAlignment = Alignment.CenterHorizontally
      ) {
          Text(
-             text = stringResource(R.string.id, detail.id ?: ""),
+             text = detail.name?.replaceFirstChar { it.uppercase() } ?: "",
              style = MaterialTheme.typography.titleLarge
          )
-         Text(
-             text = stringResource(R.string.name, detail.name ?: ""),
-             style = MaterialTheme.typography.titleMedium
-         )
-         Text(
-             text = stringResource(R.string.order, detail.order ?: ""),
-             style = MaterialTheme.typography.bodyMedium
-         )
-
-         Spacer(modifier = Modifier.height(16.dp))
-
          detail.sprites
              ?.firstOrNull { it.type == SpriteType.FRONT_DEFAULT }
              ?.let { sprite ->
@@ -136,20 +108,35 @@ fun PokemonDetailScreen(
                          .clickable { onImageClick() }
                  )
              }
-         Text(
-             text = stringResource(R.string.species, detail.species.name ?: ""),
-             style = MaterialTheme.typography.bodyMedium
-         )
-         Text(
-             text = stringResource(R.string.types, detail.types?.joinToString(", ") { it.name.toString() } ?: ""),
-             style = MaterialTheme.typography.bodyMedium
-         )
+         Row {
+             detail.types?.forEach { type ->
+                 val drawableId = type.name?.let { PokemonTypeDrawableMapper.getDrawableForType(it) }
+                 drawableId?.let {
+                     Image(
+                         painter = painterResource(id = it),
+                         contentDescription = type.name,
+                         modifier = Modifier.size(50.dp)
+                     )
+                 }
+             }
+         }
+         Row {
+             Text(
+                 text = stringResource(R.string.weight, detail.weight ?: ""),
+                 style = MaterialTheme.typography.bodyLarge
+             )
+             Spacer(modifier = Modifier.width(16.dp))
+             Text(
+                 text = stringResource(R.string.height, detail.height ?: ""),
+                 style = MaterialTheme.typography.bodyLarge
+             )
+         }
          Text(
              text = stringResource(
                  R.string.abilities,
                  detail.abilities?.joinToString(", ") { it.name.toString() } ?: ""
              ),
-             style = MaterialTheme.typography.bodyMedium
+             style = MaterialTheme.typography.bodyLarge
          )
          detail.stats?.let { stats ->
              Column(
@@ -166,19 +153,8 @@ fun PokemonDetailScreen(
              }
          }
 
-         Spacer(modifier = Modifier.height(16.dp))
 
-         Row {
-             Text(
-                 text = stringResource(R.string.weight, detail.weight ?: ""),
-                 style = MaterialTheme.typography.bodyMedium
-             )
-             Spacer(modifier = Modifier.width(16.dp))
-             Text(
-                 text = stringResource(R.string.height, detail.height ?: ""),
-                 style = MaterialTheme.typography.bodyMedium
-             )
-         }
+
      }
  }
 

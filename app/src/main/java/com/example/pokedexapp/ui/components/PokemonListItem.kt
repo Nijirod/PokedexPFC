@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -27,7 +28,7 @@ fun PokemonListItem(
 ) {
     Column(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .clickable { onItemClick(pokemon) }
     ) {
         Row(
@@ -35,23 +36,37 @@ fun PokemonListItem(
                 .fillMaxWidth()
                 .background(if (isSelected) Color.LightGray else Color.Transparent)
                 .padding(8.dp),
-            horizontalArrangement = Arrangement.End
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "${pokemon.id}   ${pokemon.name}",
+            Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 8.dp)
-            )
-            IconButton(onClick = { onFavoriteClick(!isFavorite) }) {
-                val icon = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star
-                val iconColor = if (isFavorite) Color.Yellow else Color.Gray
-                Icon(imageVector = icon, contentDescription = "Favorite", tint = iconColor)
+                    .size(64.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = pokemon.urlIcon,
+                    contentDescription = "Image of ${pokemon.name}",
+                    modifier = Modifier.size(60.dp),
+                    contentScale = ContentScale.Crop
+                )
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "${pokemon.id}  ${pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}",
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
 
+
+//            IconButton(onClick = { onFavoriteClick(!isFavorite) }) {
+//                val icon = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star
+//                val iconColor = if (isFavorite) Color.Yellow else Color.Gray
+//                Icon(imageVector = icon, contentDescription = "Favorite", tint = iconColor)
+//            }
 @Composable
 fun PokemonImageItem(
     pokemon: PokemonList,
@@ -61,7 +76,6 @@ fun PokemonImageItem(
         model = pokemon.urlImage,
         contentDescription = "Image of ${pokemon.name}",
         modifier = Modifier
-            .padding(8.dp)
             .size(128.dp)
             .clickable { onItemClick(pokemon) },
         contentScale = ContentScale.Crop
