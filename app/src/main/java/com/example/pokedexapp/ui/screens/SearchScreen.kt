@@ -4,16 +4,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material3.*
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.pokedexapp.R
 import com.example.pokedexapp.data.local.entities.pokemondetail.otherentities.SpriteType
 import com.example.pokedexapp.ui.viewmodel.PokemonSearchViewModel
 import com.example.pokedexapp.ui.navigation.PokemonNavigation
@@ -34,7 +37,7 @@ fun SearchScreen(
         OutlinedTextField(
             value = inputId,
             onValueChange = { inputId = it },
-            label = { Text("Introduce el ID del Pokémon") },
+            label = { Text(text = stringResource(R.string.enter_pokemon_id), style = MaterialTheme.typography.bodyLarge) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
@@ -50,7 +53,7 @@ fun SearchScreen(
             },
             modifier = Modifier.align(Alignment.End)
         ) {
-            Text("Buscar")
+            Text(text = stringResource(R.string.search_pokemon), style = MaterialTheme.typography.bodyLarge)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -85,7 +88,7 @@ fun SearchScreen(
                 onClick = { detail.id?.let { pokemonNavigation.navigateToDetail(it) } },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text("Ver detalle completo")
+                Text(text = stringResource(R.string.view_full_detail), style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
