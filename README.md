@@ -22,4 +22,4 @@ Aplicación móvil desarrollada en Kotlin con Jetpack Compose que simula una Pok
 3. Ejecuta en un emulador o dispositivo con Android 10+
 
 ## Autor
-Nicolás Jiménez Rodríguez – 2023/2024
+Nicolás Jiménez Rodríguez
