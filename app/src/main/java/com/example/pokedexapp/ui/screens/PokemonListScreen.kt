@@ -10,20 +10,25 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.pokedexapp.utils.getCenteredPokemonIndex
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.pokedexapp.PokemonList
+import com.example.pokedexapp.R
 import com.example.pokedexapp.ui.components.PokemonImageItem
 import com.example.pokedexapp.ui.components.PokemonListItem
 import com.example.pokedexapp.ui.navigation.PokemonNavigation
 import com.example.pokedexapp.ui.viewmodel.PokemonListViewModel
+import com.example.pokedexapp.utils.FilterOption
+import com.example.pokedexapp.utils.GenerationOption
 import com.example.pokedexapp.utils.rememberPokemonListState
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import dev.chrisbanes.snapper.rememberSnapperFlingBehavior
@@ -38,83 +43,99 @@ fun PokemonListScreen(
     var selectedPokemon by rememberPokemonListState(filteredList.firstOrNull())
 
 
-    val generations = listOf(
-        "Todas" to null,
-        "Gen 1" to (1 to 151),
-        "Gen 2" to (152 to 251),
-        "Gen 3" to (252 to 386),
-        "Gen 4" to (387 to 494),
-        "Gen 5" to (495 to 649),
-        "Gen 6" to (650 to 721),
-        "Gen 7" to (722 to 809),
-        "Gen 8" to (810 to 905),
-        "Gen 9" to (906 to 1010)
+    val generationLabels = mapOf(
+        GenerationOption.ALL to stringResource(R.string.all),
+        GenerationOption.GEN1 to stringResource(R.string.gen1),
+        GenerationOption.GEN2 to stringResource(R.string.gen2),
+        GenerationOption.GEN3 to stringResource(R.string.gen3),
+        GenerationOption.GEN4 to stringResource(R.string.gen4),
+        GenerationOption.GEN5 to stringResource(R.string.gen5),
+        GenerationOption.GEN6 to stringResource(R.string.gen6),
+        GenerationOption.GEN7 to stringResource(R.string.gen7),
+        GenerationOption.GEN8 to stringResource(R.string.gen8),
+        GenerationOption.GEN9 to stringResource(R.string.gen9)
     )
-    var selectedGen by remember { mutableStateOf(generations[0]) }
+    val generations = GenerationOption.values().toList()
+    var selectedGen by remember { mutableStateOf(GenerationOption.ALL) }
     val showFavorites by viewModel.filteredPokemonList.collectAsState().let { derivedStateOf { viewModel.filteredPokemonList.value.any { it.isFavorite } && viewModel.filteredPokemonList.value.all { it.isFavorite } } }
     var showFav by remember { mutableStateOf(false) }
+    val filterOptions = listOf(FilterOption.ALL, FilterOption.FAVORITES)
+    val filterLabels = mapOf(
+        FilterOption.ALL to stringResource(R.string.all),
+        FilterOption.FAVORITES to stringResource(R.string.favorites)
+    )
+    var selectedFilter by remember { mutableStateOf(FilterOption.ALL) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Pokédex") },
-                modifier = Modifier.fillMaxWidth().background(Color.Red),
-                actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        DropdownMenu(
-                            options = generations.map { it.first },
-                            selectedOption = selectedGen.first,
-                            onOptionSelected = { option ->
-                                selectedGen = generations.first { it.first == option }
-                                viewModel.setGeneration(selectedGen.second)
-                                viewModel.resetPage()
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DropdownMenu(
-                            options = listOf("Todos", "Favoritos"),
-                            selectedOption = if (showFav) "Favoritos" else "Todos",
-                            onOptionSelected = { option ->
-                                showFav = option == "Favoritos"
-                                viewModel.setShowFavorites(showFav)
-                                viewModel.resetPage()
-                            }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Red)
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Pokédex", style = MaterialTheme.typography.titleLarge ) },
+                    modifier = Modifier.fillMaxWidth().background(Color.Red),
+                    actions = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DropdownMenu(
+                                options = generations.map { generationLabels[it] ?: "" },
+                                selectedOption = generationLabels[selectedGen] ?: "",
+                                onOptionSelected = { label ->
+                                    val gen = generationLabels.entries.first { it.value == label }.key
+                                    selectedGen = gen
+                                    viewModel.setGeneration(gen.range?.let { it.first to it.last })
+                                    viewModel.resetPage()
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            DropdownMenu(
+                                options = filterOptions.map { filterLabels[it] ?: "" },
+                                selectedOption = filterLabels[selectedFilter] ?: "",
+                                onOptionSelected = { label ->
+                                    val filter = filterLabels.entries.first { it.value == label }.key
+                                    selectedFilter = filter
+                                    val showFav = filter == FilterOption.FAVORITES
+                                    viewModel.setShowFavorites(showFav)
+                                    viewModel.resetPage()
+                                }
+                            )
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(0.4f)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    selectedPokemon?.let { pokemon ->
+                        PokemonImageItem(
+                            pokemon = pokemon,
+                            onItemClick = { pokemonNavigation.navigateToDetail(pokemon.id.toInt()) }
                         )
                     }
                 }
-            )
-        }
-    ) { paddingValues ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(0.4f)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                selectedPokemon?.let { pokemon ->
-                    PokemonImageItem(
-                        pokemon = pokemon,
-                        onItemClick = { pokemonNavigation.navigateToDetail(pokemon.id.toInt()) }
-                    )
-                }
+                PokemonListContent(
+                    pokemonList = filteredList,
+                    modifier = Modifier.weight(0.6f),
+                    onItemClick = { pokemon ->
+                        selectedPokemon = pokemon
+                        pokemonNavigation.navigateToDetail(pokemon.id.toInt())
+                    },
+                    onLoadMore = { viewModel.loadNextPage() },
+                    viewModel = viewModel,
+                    onPokemonSelected = { selectedPokemon = it },
+                    selectedPokemon = selectedPokemon
+                )
             }
-            PokemonListContent(
-                pokemonList = filteredList,
-                modifier = Modifier.weight(0.6f),
-                onItemClick = { pokemon ->
-                    selectedPokemon = pokemon
-                    pokemonNavigation.navigateToDetail(pokemon.id.toInt())
-                },
-                onLoadMore = { viewModel.loadNextPage() },
-                viewModel = viewModel,
-                onPokemonSelected = { selectedPokemon = it },
-                selectedPokemon = selectedPokemon
-            )
         }
     }
 }

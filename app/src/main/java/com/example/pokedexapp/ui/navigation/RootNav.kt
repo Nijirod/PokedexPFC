@@ -16,6 +16,14 @@ import com.example.pokedexapp.ui.screens.SettingsScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pokedexapp.ui.viewmodel.SettingsViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.example.pokedexapp.ui.screens.setAppLocale
+import com.example.pokedexapp.utils.getSavedLanguage
+import com.example.pokedexapp.utils.saveLanguagePreference
 
 @Composable
 fun RootNav(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -73,12 +81,19 @@ fun NavGraphBuilder.addSettingsNavGraph(navController: NavHostController) {
     ) {
         composable(ScreenRoutes.SettingsScreen.route) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
+            val context = LocalContext.current
+            var currentLanguage by remember { mutableStateOf(getSavedLanguage(context)) }
 
             SettingsScreen(
                 currentTheme = settingsViewModel.currentTheme.collectAsState().value,
                 onThemeChange = { newTheme -> settingsViewModel.changeTheme(newTheme) },
-                currentLanguage = "Español",
-                onLanguageChange = {}
+                currentLanguage = currentLanguage,
+                onLanguageChange = { newLang ->
+                    currentLanguage = newLang
+                    saveLanguagePreference(context, newLang)
+                    setAppLocale(context, newLang)
+                    (context as? android.app.Activity)?.recreate()
+                }
             )
         }
     }

@@ -2,7 +2,9 @@ package com.example.pokedexapp.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,8 +15,14 @@ import com.example.pokedexapp.ui.screens.PokemonDetailScreen
 import com.example.pokedexapp.ui.screens.PokemonListScreen
 import com.example.pokedexapp.ui.screens.SearchScreen
 import com.example.pokedexapp.ui.screens.SettingsScreen
+import com.example.pokedexapp.ui.screens.setAppLocale
 import com.example.pokedexapp.ui.viewmodel.SettingsViewModel
+import com.example.pokedexapp.utils.getSavedLanguage
+import com.example.pokedexapp.utils.saveLanguagePreference
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 @Composable
 fun BottomNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
@@ -45,12 +53,19 @@ fun BottomNavGraph(navController: NavHostController, modifier: Modifier = Modifi
         }
         composable(ScreenRoutes.SettingsScreen.route) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
+            val context = LocalContext.current
+            var currentLanguage by remember { mutableStateOf(getSavedLanguage(context)) }
 
             SettingsScreen(
                 currentTheme = settingsViewModel.currentTheme.collectAsState().value,
                 onThemeChange = { newTheme -> settingsViewModel.changeTheme(newTheme) },
-                currentLanguage = "Español",
-                onLanguageChange = {}
+                currentLanguage = currentLanguage,
+                onLanguageChange = { newLang ->
+                    currentLanguage = newLang
+                    saveLanguagePreference(context, newLang)
+                    setAppLocale(context, newLang)
+                    (context as? android.app.Activity)?.recreate()
+                }
             )
         }
     }

@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Pokemon App</string>
+    <string name="species">Espèce : %1$s</string>
+    <string name="name">Nom : %1$s</string>
+    <string name="id">ID : %1$s</string>
+    <string name="order">Ordre : #%1$s</string>
+    <string name="image_of">Image de %1$s</string>
+    <string name="types">Types : %1$s</string>
+    <string name="abilities">Capacités : %1$s</string>
+    <string name="weight">Poids : %1$s</string>
+    <string name="height">Taille : %1$s</string>
+    <string name="stats">Statistiques :</string>
+    <string name="search">Rechercher</string>
+    <string name="enter_pokemon_id">Entrez l\'ID du Pokémon</string>
+    <string name="search_pokemon">Rechercher</string>
+    <string name="view_full_detail">Voir le détail complet</string>
+    <string name="image_of_label">Image de</string>
+    <string name="favorites">Favoris</string>
+    <string name="all">Tous</string>
+    <string name="gen1">Gen 1</string>
+    <string name="gen2">Gen 2</string>
+    <string name="gen3">Gen 3</string>
+    <string name="gen4">Gen 4</string>
+    <string name="gen5">Gen 5</string>
+    <string name="gen6">Gen 6</string>
+    <string name="gen7">Gen 7</string>
+    <string name="gen8">Gen 8</string>
+    <string name="gen9">Gen 9</string>
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_theme">Thème</string>
+    <string name="settings_language">Langue</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="theme_system">Thème du système</string>
+    <string name="lang_spanish">Espagnol</string>
+    <string name="lang_english">Anglais</string>
+    <string name="lang_french">Français</string>
+
+</resources>

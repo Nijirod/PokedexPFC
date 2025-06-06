@@ -14,7 +14,7 @@ fun DropdownMenu(
 
     Box {
         Button(onClick = { expanded = true }) {
-            Text(text = selectedOption)
+            Text(text = selectedOption, style = MaterialTheme.typography.bodyLarge)
         }
         DropdownMenu(
             expanded = expanded,
@@ -22,7 +22,7 @@ fun DropdownMenu(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option) },
+                    text = { Text(option, style = MaterialTheme.typography.bodyLarge) },
                     onClick = {
                         onOptionSelected(option)
                         expanded = false
