@@ -99,7 +99,11 @@ fun PokemonListScreen(
                 selectedPokemon?.let { pokemon ->
                     PokemonImageItem(
                         pokemon = pokemon,
-                        onItemClick = { pokemonNavigation.navigateToDetail(pokemon.id.toInt()) }
+                        isFavorite = pokemon.isFavorite,
+                        onItemClick = { pokemonNavigation.navigateToDetail(pokemon.id.toInt()) },
+                        onFavoriteClick = { isFavorite ->
+                            viewModel.updateFavoriteStatus(pokemon, isFavorite)
+                        }
                     )
                 }
             }

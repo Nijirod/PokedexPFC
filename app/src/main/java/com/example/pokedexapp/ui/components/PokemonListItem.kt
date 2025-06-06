@@ -70,14 +70,25 @@ fun PokemonListItem(
 @Composable
 fun PokemonImageItem(
     pokemon: PokemonList,
-    onItemClick: (PokemonList) -> Unit
-){
-    AsyncImage(
-        model = pokemon.urlImage,
-        contentDescription = "Image of ${pokemon.name}",
-        modifier = Modifier
-            .size(128.dp)
-            .clickable { onItemClick(pokemon) },
-        contentScale = ContentScale.Crop
-    )
+    isFavorite: Boolean,
+    onItemClick: (PokemonList) -> Unit,
+    onFavoriteClick: (Boolean) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AsyncImage(
+            model = pokemon.urlImage,
+            contentDescription = "Image of ${pokemon.name}",
+            modifier = Modifier
+                .size(128.dp)
+                .clickable { onItemClick(pokemon) },
+            contentScale = ContentScale.Crop
+        )
+        IconButton(onClick = { onFavoriteClick(!isFavorite) }) {
+            val icon = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star
+            val iconColor = if (isFavorite) Color.Yellow else Color.Gray
+            Icon(imageVector = icon, contentDescription = "Favorite", tint = iconColor)
+        }
+    }
 }
