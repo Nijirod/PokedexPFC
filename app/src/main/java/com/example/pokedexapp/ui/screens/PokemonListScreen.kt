@@ -110,18 +110,15 @@ fun PokemonListScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(0.4f)
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    selectedPokemon?.let { pokemon ->
-                        PokemonImageItem(
-                            pokemon = pokemon,
-                            onItemClick = { pokemonNavigation.navigateToDetail(pokemon.id.toInt()) }
-                        )
-                    }
+                selectedPokemon?.let { pokemon ->
+                    PokemonImageItem(
+                        pokemon = pokemon,
+                        isFavorite = pokemon.isFavorite,
+                        onItemClick = { pokemonNavigation.navigateToDetail(pokemon.id.toInt()) },
+                        onFavoriteClick = { isFavorite ->
+                            viewModel.updateFavoriteStatus(pokemon, isFavorite)
+                        }
+                    )
                 }
                 PokemonListContent(
                     pokemonList = filteredList,

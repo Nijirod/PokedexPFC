@@ -1,19 +1,24 @@
  package com.example.pokedexapp.ui.screens
 
 import ChoosePokemonSpriteScreen
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,53 +30,74 @@ import com.example.pokedexapp.R
 import com.example.pokedexapp.data.local.entities.pokemondetail.otherentities.SpriteType
 import com.example.pokedexapp.ui.components.StatBar
 import com.example.pokedexapp.ui.viewmodel.PokemonDetailViewModel
-import com.example.pokedexapp.utils.ImageResizer
 import com.example.pokedexapp.utils.PokemonTypeDrawableMapper
-import com.example.pokedexapp.utils.WearNodeHelper
-import com.example.pokedexapp.utils.sendUrlsToWear
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 
+ @OptIn(ExperimentalAnimationApi::class)
  @Composable
-fun PokemonDetailScreen(
-    pokemonId: Int,
-    modifier: Modifier = Modifier,
-    viewModel: PokemonDetailViewModel = hiltViewModel()
-) {
-    val scrollState = rememberScrollState()
-    val pokemonDetail by viewModel.pokemonDetail.collectAsState()
-    var showSpriteChooser by remember { mutableStateOf(false) }
-    var selectedSpriteUrl by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
+ fun PokemonDetailScreen(
+     pokemonId: Int,
+     modifier: Modifier = Modifier,
+     viewModel: PokemonDetailViewModel = hiltViewModel()
+ ) {
+     var currentId by remember { mutableStateOf(pokemonId) }
+     var swipeDirection by remember { mutableStateOf(0) }
+     val pokemonDetail by viewModel.pokemonDetail.collectAsState()
+     var showSpriteChooser by remember { mutableStateOf(false) }
+     var selectedSpriteUrl by remember { mutableStateOf<String?>(null) }
+
+     LaunchedEffect(currentId) {
+         viewModel.fetchPokemonDetail(currentId)
+     }
 
 
+     LaunchedEffect(pokemonDetail) {
+         kotlinx.coroutines.delay(80)
+         selectedSpriteUrl = null
+     }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchPokemonDetail(pokemonId)
-    }
-
-
-    pokemonDetail?.let { detail ->
-        PokemonDetailContent(
-            detail = detail,
-            modifier = modifier,
-            scrollState = scrollState,
-            selectedSpriteUrl = selectedSpriteUrl,
-            onImageClick = { showSpriteChooser = true }
-        )
-        if (showSpriteChooser) {
-            ChoosePokemonSpriteScreen(
-                sprites = detail.sprites?.mapNotNull { it.url } ?: emptyList(),
-                onSpriteSelected = { url ->
-                    selectedSpriteUrl = url
-                    showSpriteChooser = false
-                },
-                onDismiss = { showSpriteChooser = false }
-            )
-        }
-    }
-}
+     AnimatedContent(
+         targetState = pokemonDetail,
+         transitionSpec = {
+             if (swipeDirection >= 0) {
+                 slideInHorizontally { it } with slideOutHorizontally { -it }
+             } else {
+                 slideInHorizontally { -it } with slideOutHorizontally { it }
+             }
+         },
+         modifier = modifier.pointerInput(currentId) {
+             detectHorizontalDragGestures { _, dragAmount ->
+                 if (dragAmount > 0 && currentId > 1) {
+                     swipeDirection = -1
+                     currentId -= 1
+                 } else if (dragAmount < 0) {
+                     swipeDirection = 1
+                     currentId += 1
+                 }
+             }
+         }
+     ) { detail ->
+         detail?.let {
+             PokemonDetailContent(
+                 detail = it,
+                 modifier = Modifier,
+                 scrollState = rememberScrollState(),
+                 selectedSpriteUrl = selectedSpriteUrl,
+                 onImageClick = { showSpriteChooser = true }
+             )
+             if (showSpriteChooser) {
+                 ChoosePokemonSpriteScreen(
+                     sprites = it.sprites?.mapNotNull { sprite -> sprite.url } ?: emptyList(),
+                     onSpriteSelected = { url ->
+                         selectedSpriteUrl = url
+                         showSpriteChooser = false
+                     },
+                     onDismiss = { showSpriteChooser = false }
+                 )
+             }
+         }
+     }
+ }
  @Composable
  private fun PokemonDetailContent(
      detail: PokemonDetail,
