@@ -13,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.pokedexapp.ui.navigation.BottomBar
 import com.example.pokedexapp.ui.navigation.BottomNavGraph
+import com.example.pokedexapp.ui.screens.setAppLocale
 import com.example.pokedexapp.ui.theme.PokemonAppTheme
 import com.example.pokedexapp.utils.MyWearableCapabilityListener
+import com.example.pokedexapp.utils.getSavedLanguage
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
@@ -26,6 +28,8 @@ class MainActivity : ComponentActivity(), MessageClient.OnMessageReceivedListene
     private lateinit var capabilityListener: MyWearableCapabilityListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val language = getSavedLanguage(this)
+        setAppLocale(this, language)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
